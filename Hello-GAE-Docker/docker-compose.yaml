@@ -1,0 +1,13 @@
+version: "3.6"
+
+services:
+  api:
+    build:
+      context: .
+    volumes:
+      - .:/go/src/path/to/project
+    ports:
+      - 8080:8080
+      - 8000:8000
+    command: dev_appserver.py ./app/app.yaml --host 0.0.0.0 --admin_host 0.0.0.0 --datastore_path .datastore
+    #command: ls -l ./app
