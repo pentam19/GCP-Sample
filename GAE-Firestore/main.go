@@ -40,7 +40,7 @@ func AddUser(c *gin.Context) {
 	ctx := appengine.NewContext(c.Request)
 
 	// 2019/3月現在
-	// GCPコンソールで新しいプロジェクトを作成し
+	// GCPコンソールで新しいプロジェクトを作成する
 	// Datastoreの画面を開く
 	// Firestoreへのアップグレードボタンを押すとDatastoreモードのFirestoreになる
 	// 以下の通り、従来のDatastoreへアクセスするコードがそのまま使える
@@ -48,7 +48,7 @@ func AddUser(c *gin.Context) {
 		Name: "Test User Name",
 		Age:  80,
 	}
-	key := datastore.NewIncompleteKey(c, "userdata", nil)
+	key := datastore.NewIncompleteKey(ctx, "userdata", nil)
 	_, err := datastore.Put(ctx, key, &data)
 	if err != nil {
 		c.String(500, "err")
