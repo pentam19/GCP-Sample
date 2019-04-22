@@ -452,7 +452,7 @@ func GetMultiID1IDOnly(c *gin.Context) {
 	ctx := appengine.NewContext(c.Request)
 
 	Id := c.Param("id")
-	// "UserID1", "Attr1"は射影できない
+	// "UserID2"は射影できない
 	q := datastore.NewQuery("MultiIDData").Filter("UserID2 =", Id).Project("UserID1", "Attr1")
 
 	var ms []MultiID
