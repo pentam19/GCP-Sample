@@ -52,6 +52,13 @@ type MapUser struct {
 	ClearNum int
 }
 
+type MultiID struct {
+	UserID1 string
+	UserID2 string
+	Attr1   string
+	Attr2   string
+}
+
 const rsLetters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func RandString(n int) string {
@@ -99,6 +106,15 @@ func main() {
 	r.POST("/mapusers/:id", AddMapUser)
 	// curl https://[project].com/mapusers/001
 	r.GET("/mapusers/:id", GetMapUser)
+
+	// curl -X POST https://[project].com/multiid -d '{"UserID1": "abcXXX01","UserID2": "abcXXX02","Attr1":"aaa","Attr2":"bbb"}'
+	r.POST("/multiid", AddMultiID)
+	// curl https://[project].com/multiid1/abcXXX01
+	r.GET("/multiid1/:id", GetMultiID1)
+	// curl https://[project].com/multiid2/abcXXX02
+	r.GET("/multiid2/:id", GetMultiID2)
+	// curl https://[project].com/multiid1only/abcXXX01
+	r.GET("/multiid1only/:id", GetMultiID1IDOnly)
 
 	http.Handle("/", r)
 	appengine.Main()
@@ -377,4 +393,82 @@ func GetMapUser(c *gin.Context) {
 		keysSlice = append(keysSlice, key.StringID())
 	}
 	c.JSON(200, keysSlice)
+}
+
+func AddMultiID(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+
+	// Parent
+	/*
+		m := MultiID {
+			UserID1: "123abc",
+			UserID2: "abc123",
+			attr1: "aaa",
+			attr2: "bbb"
+		}
+	*/
+	var m MultiID
+	c.BindJSON(&m)
+	key := datastore.NewKey(ctx, "MultiIDData", "", 0, nil)
+	_, err := datastore.Put(ctx, key, &m)
+	if err != nil {
+		c.String(500, "err")
+	}
+
+	c.String(200, key.String())
+}
+
+func GetMultiID1(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+
+	Id := c.Param("id")
+	q := datastore.NewQuery("MultiIDData").Filter("UserID1 =", Id)
+
+	var m []MultiID
+	_, err := q.GetAll(ctx, &m)
+	if err != nil {
+		c.String(500, err.Error())
+	}
+
+	c.JSON(200, m)
+}
+
+func GetMultiID2(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+
+	Id := c.Param("id")
+	q := datastore.NewQuery("MultiIDData").Filter("UserID2 =", Id)
+
+	var m []MultiID
+	_, err := q.GetAll(ctx, &m)
+	if err != nil {
+		c.String(500, err.Error())
+	}
+
+	c.JSON(200, m)
+}
+
+func GetMultiID1IDOnly(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+
+	Id := c.Param("id")
+	// "UserID1", "Attr1"は射影できない
+	q := datastore.NewQuery("MultiIDData").Filter("UserID2 =", Id).Project("UserID1", "Attr1")
+
+	var ms []MultiID
+	iter := q.Run(ctx)
+	for {
+		var m MultiID
+		_, err := iter.Next(&m)
+		if err == datastore.Done {
+			break
+		}
+		if err != nil {
+			c.String(500, err.Error())
+			break
+		}
+		ms = append(ms, m)
+	}
+
+	c.JSON(200, ms)
 }
