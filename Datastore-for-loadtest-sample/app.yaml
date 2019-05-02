@@ -2,3 +2,14 @@ runtime: go111
 handlers:
 - url: /.*
   script: auto
+instance_class: F4
+automatic_scaling:
+  target_cpu_utilization: 0.70
+  target_throughput_utilization: 0.70
+  min_idle_instances: 0
+  max_idle_instances: 50
+  min_instances: 0
+  max_instances: 30
+  min_pending_latency: automatic
+  max_pending_latency: automatic
+  max_concurrent_requests: 80

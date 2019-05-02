@@ -38,7 +38,7 @@ type ResponseJSON struct {
 // Deploy
 //  gcloud app deploy --project [projectid] -v testapiv001
 func main() {
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 
 	r.GET("/", func(c *gin.Context) {
