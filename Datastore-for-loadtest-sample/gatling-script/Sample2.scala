@@ -21,10 +21,9 @@ import io.gatling.http.Predef._
 import scala.concurrent.duration._
 
 // sh bin/gatling.sh
-class Sample extends Simulation {
+class Sample2 extends Simulation {
 
   val httpProtocol = http
-    //.baseUrl("https://newgaefirestore.appspot.com")
     .baseUrl("http://localhost:8080")
     .acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
     .doNotTrackHeader("1")
@@ -37,18 +36,13 @@ class Sample extends Simulation {
   val users = scenario("Sample")
     .feed(userIdFeeder)
     .exec(http("request_1")
-      .post("/user/${userId}")
-      //.post("/friends02/${userId}")
+      //.post("/friends01/${userId}")
+      .post("/friends02/${userId}")
       .check(jsonPath("$.UUID").saveAs("uuid")))
-    .pause(1)
+    .pause(1000 milliseconds)
     .exec(http("request_2")
-      .post("/friends01/${uuid}")
-      //.post("/friends02/${userId}")
-      .check(jsonPath("$.UUID").saveAs("uuid")))
-    .pause(1)
-    .exec(http("request_3")
-      .get("/friends01/${uuid}")
-      //.get("/friends02/${uuid}")
+      //.get("/friends01/${uuid}")
+      .get("/friends02/${uuid}")
       .check(bodyString.saveAs("bodyString")))
     .exec( session => {
       println( "Result bodyString: " )
@@ -59,7 +53,7 @@ class Sample extends Simulation {
   setUp(
     users.inject(
       rampUsersPerSec(1) to (3) during (3 seconds),
-      constantUsersPerSec(3) during(5 seconds)
+      constantUsersPerSec(3) during(2 seconds)
     ).protocols(httpProtocol)
   )
 }

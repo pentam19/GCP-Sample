@@ -38,15 +38,17 @@ type ResponseJSON struct {
 // Deploy
 //  gcloud app deploy --project [projectid] -v testapiv001
 func main() {
-	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "hello")
 	})
 
-	// curl -X POST https://[project].com/friends01/1
-	r.POST("/friends01/:id", AddFriendEList)
+	// curl -X POST https://[project].com/user/1
+	r.POST("/user/:id", AddUser)
+	// curl -X POST https://[project].com/friends01/d05040b2-423d-4f91-a958-11f580e156ef
+	r.POST("/friends01/:uuid", AddFriendEList)
 	// curl https://[project].com/friends01/d05040b2-423d-4f91-a958-11f580e156ef
 	r.GET("/friends01/:uuid", GetFriendEList)
 
@@ -59,7 +61,7 @@ func main() {
 	appengine.Main()
 }
 
-func AddFriendEList(c *gin.Context) {
+func AddUser(c *gin.Context) {
 	ctx := appengine.NewContext(c.Request)
 
 	// Parent
@@ -76,18 +78,29 @@ func AddFriendEList(c *gin.Context) {
 		c.String(500, "err")
 	}
 
+	//c.String(200, pkey.String())
+	c.JSON(200, ResponseJSON{UUID: uuid})
+}
+
+func AddFriendEList(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+
+	// Parent
+	uuid := c.Param("uuid")
+	pkey := datastore.NewKey(ctx, "UserFriend01", uuid, 0, nil)
+
 	// FriendList
 	var fList []FriendList
 	var fkeys []*datastore.Key
 	for i := 0; i < 10; i++ {
 		f := FriendList{
-			FriendID: "friend-" + nameid + "-" + strconv.Itoa(i),
+			FriendID: "friend-" + uuid + "-" + strconv.Itoa(i),
 		}
 		fList = append(fList, f)
 		fkey := datastore.NewKey(ctx, "FriendList", f.FriendID, 0, pkey)
 		fkeys = append(fkeys, fkey)
 	}
-	_, err = datastore.PutMulti(ctx, fkeys, fList)
+	_, err := datastore.PutMulti(ctx, fkeys, fList)
 	if err != nil {
 		c.String(500, err.Error())
 	}
