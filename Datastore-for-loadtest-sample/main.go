@@ -26,6 +26,10 @@ type UserDataFriendListSlice struct {
 	FriendList []string
 }
 
+type FriendListNoParentE struct {
+	FriendID string
+}
+
 type ResponseJSON struct {
 	UUID string
 }
@@ -56,6 +60,11 @@ func main() {
 	r.POST("/friends02/:id", AddFriendSList)
 	// curl https://[project].com/friends02/d05040b2-423d-4f91-a958-11f580e156ef
 	r.GET("/friends02/:uuid", GetFriendSList)
+
+	// curl -X POST https://[project].com/friends03/d05040b2-423d-4f91-a958-11f580e156ef
+	r.POST("/friends03/:uuid", AddFriendNoPEList)
+	// curl https://[project].com/friends03/d05040b2-423d-4f91-a958-11f580e156ef
+	r.GET("/friends03/:uuid", GetFriendNoPEList)
 
 	http.Handle("/", r)
 	appengine.Main()
@@ -168,4 +177,51 @@ func GetFriendSList(c *gin.Context) {
 	}
 
 	c.JSON(200, friends.FriendList)
+}
+
+func AddFriendNoPEList(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+
+	// Parent
+	uuid := c.Param("uuid")
+	pkey := datastore.NewKey(ctx, "UserNoEntity", uuid, 0, nil)
+
+	// FriendList
+	var fList []FriendList
+	var fkeys []*datastore.Key
+	for i := 0; i < 10; i++ {
+		f := FriendList{
+			FriendID: "friend-" + uuid + "-" + strconv.Itoa(i),
+		}
+		fList = append(fList, f)
+		fkey := datastore.NewKey(ctx, "FriendListNoPE", f.FriendID, 0, pkey)
+		fkeys = append(fkeys, fkey)
+	}
+	_, err := datastore.PutMulti(ctx, fkeys, fList)
+	if err != nil {
+		c.String(500, err.Error())
+	}
+
+	//c.String(200, pkey.String())
+	c.JSON(200, ResponseJSON{UUID: uuid})
+}
+
+func GetFriendNoPEList(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+
+	uuid := c.Param("uuid")
+	pkey := datastore.NewKey(ctx, "UserNoEntity", uuid, 0, nil)
+
+	q := datastore.NewQuery("FriendListNoPE").KeysOnly().Ancestor(pkey)
+
+	keys, err := q.GetAll(ctx, nil)
+	if err != nil {
+		c.String(500, err.Error())
+	}
+
+	keysSlice := make([]string, 0, len(keys))
+	for _, key := range keys {
+		keysSlice = append(keysSlice, key.StringID())
+	}
+	c.JSON(200, keysSlice)
 }
