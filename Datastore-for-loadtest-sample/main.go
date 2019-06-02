@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/uniplaces/carbon"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 )
@@ -28,10 +30,25 @@ type UserDataFriendListSlice struct {
 
 type FriendListNoParentE struct {
 	FriendID string
+	UUID2    string
+}
+
+type GetFriendListNoParentEParam struct {
+	UUID1 string
+	UUID2 string
 }
 
 type ResponseJSON struct {
-	UUID string
+	UUID      string
+	LastUUID2 string
+}
+
+type UserTime struct {
+	UUID1 string
+	UUID2 string `datastore:",noindex"`
+	//Name  string `datastore:",noindex"`
+	Score int   `datastore:",noindex"`
+	Time  int64 `datastore:",noindex"`
 }
 
 // Preparation
@@ -41,8 +58,9 @@ type ResponseJSON struct {
 //  dev_appserver.py app.yaml
 // Deploy
 //  gcloud app deploy --project [projectid] -v testapiv001
+//  gcloud app deploy --project [projectID] -v [version] index.yaml
 func main() {
-	gin.SetMode(gin.ReleaseMode)
+	//gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 
 	r.GET("/", func(c *gin.Context) {
@@ -65,11 +83,21 @@ func main() {
 	r.POST("/friends03/:uuid", AddFriendNoPEList)
 	// curl https://[project].com/friends03/d05040b2-423d-4f91-a958-11f580e156ef
 	r.GET("/friends03/:uuid", GetFriendNoPEList)
+	// curl -X POST https://[project].com/friends03-2 -d '{"UUID1": "a958-11f580e156ef", "UUID2": "aaa"}'
+	r.POST("/friends03-2", GetFriendNoPEList2)
+
+	// curl -X POST https://[project].com/usertime/d05040b2-423d-4f91-a958-11f580e156ef
+	r.POST("/usertime/:uuid", AddUserTimeList)
+	// curl https://[project].com/usertime/d05040b2-423d-4f91-a958-11f580e156ef
+	r.GET("/usertime1/:uuid", GetUserTimeList)
+	// curl https://[project].com/usertime2/d05040b2-423d-4f91-a958-11f580e156ef
+	r.GET("/usertime2/:uuid", GetUserTimeList2)
 
 	http.Handle("/", r)
 	appengine.Main()
 }
 
+// test1
 func AddUser(c *gin.Context) {
 	ctx := appengine.NewContext(c.Request)
 
@@ -138,6 +166,7 @@ func GetFriendEList(c *gin.Context) {
 	c.JSON(200, keysSlice)
 }
 
+// test2
 func AddFriendSList(c *gin.Context) {
 	ctx := appengine.NewContext(c.Request)
 
@@ -179,19 +208,23 @@ func GetFriendSList(c *gin.Context) {
 	c.JSON(200, friends.FriendList)
 }
 
+// test3
 func AddFriendNoPEList(c *gin.Context) {
 	ctx := appengine.NewContext(c.Request)
 
-	// Parent
-	uuid := c.Param("uuid")
-	pkey := datastore.NewKey(ctx, "UserNoEntity", uuid, 0, nil)
+	// ParentKey
+	uuid1 := c.Param("uuid")
+	pkey := datastore.NewKey(ctx, "UserNoEntity", uuid1, 0, nil)
 
 	// FriendList
-	var fList []FriendList
+	var fList []FriendListNoParentE
 	var fkeys []*datastore.Key
+	var uuid2 string
 	for i := 0; i < 10; i++ {
-		f := FriendList{
-			FriendID: "friend-" + uuid + "-" + strconv.Itoa(i),
+		uuid2 = uuid.New().String()
+		f := FriendListNoParentE{
+			FriendID: "friend-" + uuid1 + "-" + strconv.Itoa(i),
+			UUID2:    uuid2,
 		}
 		fList = append(fList, f)
 		fkey := datastore.NewKey(ctx, "FriendListNoPE", f.FriendID, 0, pkey)
@@ -203,7 +236,7 @@ func AddFriendNoPEList(c *gin.Context) {
 	}
 
 	//c.String(200, pkey.String())
-	c.JSON(200, ResponseJSON{UUID: uuid})
+	c.JSON(200, ResponseJSON{UUID: uuid1, LastUUID2: uuid2})
 }
 
 func GetFriendNoPEList(c *gin.Context) {
@@ -212,7 +245,7 @@ func GetFriendNoPEList(c *gin.Context) {
 	uuid := c.Param("uuid")
 	pkey := datastore.NewKey(ctx, "UserNoEntity", uuid, 0, nil)
 
-	q := datastore.NewQuery("FriendListNoPE").KeysOnly().Ancestor(pkey)
+	q := datastore.NewQuery("FriendListNoPE").Ancestor(pkey).KeysOnly()
 
 	keys, err := q.GetAll(ctx, nil)
 	if err != nil {
@@ -224,4 +257,103 @@ func GetFriendNoPEList(c *gin.Context) {
 		keysSlice = append(keysSlice, key.StringID())
 	}
 	c.JSON(200, keysSlice)
+}
+
+func GetFriendNoPEList2(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+
+	param := GetFriendListNoParentEParam{}
+	c.BindJSON(&param)
+	pkey := datastore.NewKey(ctx, "UserNoEntity", param.UUID1, 0, nil)
+
+	q := datastore.NewQuery("FriendListNoPE").Ancestor(pkey).Filter("UUID2 =", param.UUID2).KeysOnly()
+
+	keys, err := q.GetAll(ctx, nil)
+	if err != nil {
+		c.String(500, err.Error())
+	}
+
+	keysSlice := make([]string, 0, len(keys))
+	for _, key := range keys {
+		keysSlice = append(keysSlice, key.StringID())
+	}
+	c.JSON(200, keysSlice)
+}
+
+// test4
+func AddUserTimeList(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+	uuid1 := c.Param("uuid")
+
+	referenceTime, _ := carbon.CreateFromFormat(carbon.DefaultFormat, "2019-01-01 10:00:00", "UTC")
+
+	kindName := "UserTime"
+	var i int64
+	var list []UserTime
+	var keys []*datastore.Key
+	for i = 0; i < 60; i++ {
+		uuid2 := uuid.New().String()
+
+		data := UserTime{
+			UUID1: uuid1,
+			UUID2: uuid2,
+			//Name:  "name",
+			//Score: 100,
+			Time: referenceTime.Unix() + i,
+		}
+		list = append(list, data)
+		key := datastore.NewIncompleteKey(ctx, kindName, nil)
+		keys = append(keys, key)
+	}
+
+	_, err := datastore.PutMulti(ctx, keys, list)
+	if err != nil {
+		c.String(500, err.Error())
+	}
+
+	c.JSON(200, ResponseJSON{UUID: uuid1})
+}
+
+// パフォーマンスNG
+func GetUserTimeList(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+	uuid1 := c.Param("uuid")
+
+	referenceTime, _ := carbon.CreateFromFormat(carbon.DefaultFormat, "2019-01-01 10:00:30", "UTC")
+
+	kindName := "UserTime"
+	var data []UserTime
+	q := datastore.NewQuery(kindName).Filter("UUID1 =", uuid1).Filter("Time >", referenceTime.Unix())
+	_, err := q.GetAll(ctx, &data)
+	if err != nil {
+		c.String(500, err.Error())
+	}
+
+	//c.JSON(200, data)
+	c.String(200, fmt.Sprintf("uuid: %v, len: %v", uuid1, len(data)))
+}
+
+// OK
+func GetUserTimeList2(c *gin.Context) {
+	ctx := appengine.NewContext(c.Request)
+	uuid1 := c.Param("uuid")
+
+	referenceTime, _ := carbon.CreateFromFormat(carbon.DefaultFormat, "2019-01-01 10:00:30", "UTC")
+
+	kindName := "UserTime"
+	var data []UserTime
+	q := datastore.NewQuery(kindName).Filter("UUID1 =", uuid1)
+	_, err := q.GetAll(ctx, &data)
+	if err != nil {
+		c.String(500, err.Error())
+	}
+	var upperRefData []UserTime
+	for _, u := range data {
+		if u.Time > referenceTime.Unix() {
+			upperRefData = append(upperRefData, u)
+		}
+	}
+
+	//c.JSON(200, data)
+	c.String(200, fmt.Sprintf("uuid: %v, len: %v", uuid1, len(upperRefData)))
 }

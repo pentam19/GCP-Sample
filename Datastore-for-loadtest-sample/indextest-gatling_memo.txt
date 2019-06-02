@@ -1,0 +1,175 @@
+Name time no index
+================================================================================
+---- Global Information --------------------------------------------------------
+> request count                                     255500 (OK=255499 KO=1     )
+> min response time                                     81 (OK=81     KO=593   )
+> max response time                                   4097 (OK=4097   KO=593   )
+> mean response time                                   402 (OK=402    KO=593   )
+> std deviation                                        274 (OK=274    KO=0     )
+> response time 50th percentile                        541 (OK=542    KO=593   )
+> response time 75th percentile                        650 (OK=650    KO=593   )
+> response time 95th percentile                        709 (OK=709    KO=593   )
+> response time 99th percentile                        835 (OK=835    KO=593   )
+> mean requests/sec                                502.953 (OK=502.951 KO=0.002 )
+---- Response Time Distribution ------------------------------------------------
+> t < 800 ms                                        252178 ( 99%)
+> 800 ms < t < 1200 ms                                2627 (  1%)
+> t > 1200 ms                                          694 (  0%)
+> failed                                                 1 (  0%)
+---- Errors --------------------------------------------------------------------
+> status.find.in(200,201,202,203,204,205,206,207,208,209,304), f      1 (100.0%)
+ound 500
+================================================================================
+All index
+================================================================================
+---- Global Information --------------------------------------------------------
+> request count                                     255500 (OK=255500 KO=0     )
+> min response time                                     84 (OK=84     KO=-     )
+> max response time                                   3254 (OK=3254   KO=-     )
+> mean response time                                   436 (OK=436    KO=-     )
+> std deviation                                        286 (OK=286    KO=-     )
+> response time 50th percentile                        620 (OK=620    KO=-     )
+> response time 75th percentile                        676 (OK=676    KO=-     )
+> response time 95th percentile                        766 (OK=766    KO=-     )
+> response time 99th percentile                        959 (OK=959    KO=-     )
+> mean requests/sec                                501.965 (OK=501.965 KO=-     )
+---- Response Time Distribution ------------------------------------------------
+> t < 800 ms                                        246516 ( 96%)
+> 800 ms < t < 1200 ms                                8213 (  3%)
+> t > 1200 ms                                          771 (  0%)
+> failed                                                 0 (  0%)
+================================================================================
+
+Uuid2, name no index
+================================================================================
+---- Global Information --------------------------------------------------------
+> request count                                     255500 (OK=255500 KO=0     )
+> min response time                                     84 (OK=84     KO=-     )
+> max response time                                   3379 (OK=3379   KO=-     )
+> mean response time                                   405 (OK=405    KO=-     )
+> std deviation                                        268 (OK=268    KO=-     )
+> response time 50th percentile                        553 (OK=553    KO=-     )
+> response time 75th percentile                        645 (OK=645    KO=-     )
+> response time 95th percentile                        709 (OK=709    KO=-     )
+> response time 99th percentile                        817 (OK=817    KO=-     )
+> mean requests/sec                                501.965 (OK=501.965 KO=-     )
+---- Response Time Distribution ------------------------------------------------
+> t < 800 ms                                        252505 ( 99%)
+> 800 ms < t < 1200 ms                                2581 (  1%)
+> t > 1200 ms                                          414 (  0%)
+> failed                                                 0 (  0%)
+================================================================================
+
+Add Score / Uuid2, name, Score no index
+================================================================================
+---- Global Information --------------------------------------------------------
+> request count                                     255500 (OK=255498 KO=2     )
+> min response time                                     84 (OK=84     KO=626   )
+> max response time                                  10952 (OK=10952  KO=629   )
+> mean response time                                   437 (OK=437    KO=628   )
+> std deviation                                        269 (OK=269    KO=2     )
+> response time 50th percentile                        595 (OK=595    KO=628   )
+> response time 75th percentile                        673 (OK=673    KO=628   )
+> response time 95th percentile                        755 (OK=755    KO=629   )
+> response time 99th percentile                        880 (OK=880    KO=629   )
+> mean requests/sec                                494.197 (OK=494.193 KO=0.004 )
+---- Response Time Distribution ------------------------------------------------
+> t < 800 ms                                        249128 ( 98%)
+> 800 ms < t < 1200 ms                                6043 (  2%)
+> t > 1200 ms                                          327 (  0%)
+> failed                                                 2 (  0%)
+---- Errors --------------------------------------------------------------------
+> jsonPath($.UUID).find.exists preparation crashed: Jodd failed       2 (100.0%)
+to parse into a valid AST: j.j.JsonException: Syntax error! In...
+================================================================================
+
+Add Score / Uuid2, name no index
+================================================================================
+ -> NG
+================================================================================
+
+Add Score All index
+================================================================================
+---- Global Information --------------------------------------------------------
+> request count                                     255500 (OK=255495 KO=5     )
+> min response time                                     85 (OK=85     KO=3892  )
+> max response time                                  25536 (OK=25536  KO=5159  )
+> mean response time                                   628 (OK=628    KO=4446  )
+> std deviation                                        946 (OK=946    KO=474   )
+> response time 50th percentile                        671 (OK=671    KO=4203  )
+> response time 75th percentile                        765 (OK=765    KO=4838  )
+> response time 95th percentile                       1369 (OK=1368   KO=5095  )
+> response time 99th percentile                       4301 (OK=4299   KO=5146  )
+> mean requests/sec                                 500.98 (OK=500.971 KO=0.01  )
+---- Response Time Distribution ------------------------------------------------
+> t < 800 ms                                        211029 ( 83%)
+> 800 ms < t < 1200 ms                               28659 ( 11%)
+> t > 1200 ms                                        15807 (  6%)
+> failed                                                 5 (  0%)
+---- Errors --------------------------------------------------------------------
+> jsonPath($.UUID).find.exists preparation crashed: Jodd failed       5 (100.0%)
+to parse into a valid AST: j.j.JsonException: Syntax error! In...
+================================================================================
+
+UUID1以外 no index
+================================================================================
+---- Global Information --------------------------------------------------------
+> request count                                     255500 (OK=255499 KO=1     )
+> min response time                                     86 (OK=86     KO=757   )
+> max response time                                  10576 (OK=10576  KO=757   )
+> mean response time                                   408 (OK=408    KO=757   )
+> std deviation                                        270 (OK=270    KO=0     )
+> response time 50th percentile                        544 (OK=544    KO=757   )
+> response time 75th percentile                        646 (OK=646    KO=757   )
+> response time 95th percentile                        721 (OK=721    KO=757   )
+> response time 99th percentile                        924 (OK=924    KO=757   )
+> mean requests/sec                                495.155 (OK=495.153 KO=0.002 )
+---- Response Time Distribution ------------------------------------------------
+> t < 800 ms                                        250324 ( 98%)
+> 800 ms < t < 1200 ms                                4525 (  2%)
+> t > 1200 ms                                          650 (  0%)
+> failed                                                 1 (  0%)
+---- Errors --------------------------------------------------------------------
+> status.find.in(200,201,202,203,204,205,206,207,208,209,304), f      1 (100.0%)
+ound 500
+================================================================================
+
+Del Name, Score / UUID1以外 no index
+================================================================================
+---- Global Information --------------------------------------------------------
+> request count                                     255500 (OK=255500 KO=0     )
+> min response time                                     85 (OK=85     KO=-     )
+> max response time                                   3612 (OK=3612   KO=-     )
+> mean response time                                   402 (OK=402    KO=-     )
+> std deviation                                        260 (OK=260    KO=-     )
+> response time 50th percentile                        511 (OK=511    KO=-     )
+> response time 75th percentile                        645 (OK=645    KO=-     )
+> response time 95th percentile                        709 (OK=709    KO=-     )
+> response time 99th percentile                        797 (OK=797    KO=-     )
+> mean requests/sec                                 500.98 (OK=500.98 KO=-     )
+---- Response Time Distribution ------------------------------------------------
+> t < 800 ms                                        253057 ( 99%)
+> 800 ms < t < 1200 ms                                2246 (  1%)
+> t > 1200 ms                                          197 (  0%)
+> failed                                                 0 (  0%)
+================================================================================
+
+Del Name, Add Score / UUID1以外 no index
+================================================================================
+---- Global Information --------------------------------------------------------
+> request count                                     255500 (OK=255500 KO=0     )
+> min response time                                     87 (OK=87     KO=-     )
+> max response time                                   2569 (OK=2569   KO=-     )
+> mean response time                                   426 (OK=426    KO=-     )
+> std deviation                                        262 (OK=262    KO=-     )
+> response time 50th percentile                        576 (OK=576    KO=-     )
+> response time 75th percentile                        655 (OK=655    KO=-     )
+> response time 95th percentile                        728 (OK=728    KO=-     )
+> response time 99th percentile                        840 (OK=840    KO=-     )
+> mean requests/sec                                502.953 (OK=502.953 KO=-     )
+---- Response Time Distribution ------------------------------------------------
+> t < 800 ms                                        251500 ( 98%)
+> 800 ms < t < 1200 ms                                3784 (  1%)
+> t > 1200 ms                                          216 (  0%)
+> failed                                                 0 (  0%)
+================================================================================

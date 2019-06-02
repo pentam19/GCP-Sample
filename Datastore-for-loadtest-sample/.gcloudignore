@@ -12,6 +12,14 @@
 # below:
 .git
 .gitignore
+.DS_Store
+gatling-script
+results
+results.zip
+result_01_memo.txt
+result_02_memo.txt
+memo.txt
+kakin_memo.txt
 
 # Binaries for programs and plugins
 *.exe
